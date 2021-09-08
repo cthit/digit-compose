@@ -1,0 +1,60 @@
+version: '3'
+services:
+  db:
+    image: mariadb
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+    volumes:
+    - /data/chalmersit/mysql:/var/lib/mysql/
+    labels:
+      bagop.enable: 'true'
+      bagop.name: chalmers-it
+  
+  redis:
+    image: redis
+    labels:
+      io.rancher.container.pull_image: alwayse
+    external_links:
+    - lunch/lunch:lunch.chalmers.it
+  
+
+  adminer:
+    image: adminer
+    ports:
+    - 9451:8080/tcp
+
+  chalmers-it:
+    image: cthit/chalmers_it:gamma
+    environment:
+      GOTIFY_API_URL: ${GOTIFY_API_URL}
+      GOTIFY_PRE_SHARED_KEY: ${GOTIFY_PRE_SHARED_KEY}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      OAUTH_SECRET: ${OAUTH_SECRET}
+      OAUTH_ID: ${OAUTH_ID}
+      CLIENT_CREDENTIALS: ${CLIENT_CREDENTIALS}
+      ACCOUNT_ADDRESS: ${ACCOUNT_ADDRESS}
+      REDIS_URL: ${REDIS_URL}
+      CTHIT_SLACK_URL: ${CTHIT_SLACK_URL}
+      MRCIT_SLACK_URL: ${MRCIT_SLACK_URL}
+    external_links:
+    - NotificationService/gotify:gotify
+    - lunch/load-balancer:lunch.chalmers.it
+    - Gamma/proxy:gamma.chalmers.it
+    volumes:
+    - /data/chalmersit/files:/app/public/uploads
+    - /data/chalmersit/old-files:/app/public/core
+    command:
+    - rails
+    - s
+    - -p
+    - '3001'
+    - -b
+    - 0.0.0.0
+
