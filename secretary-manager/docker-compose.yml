@@ -1,0 +1,39 @@
+version: '3'
+services: 
+  backend:
+    image: viddem/styrit-secretary-manager-backend:latest
+    environment:
+      gotify_auth_key: ${GOTIFY_AUTH_KEY}
+      frontend_admin_pass: ${FRONTEND_ADMIN_PASS}
+      SECRETARY_POSTGRES_USER: ${SECRETARY_POSTGRES_USER}
+      SECRETARY_POSTGRES_PASSWORD: ${SECRETARY_POSTGRES_PASSWORD}
+      SECRETARY_POSTGRES_HOST: ${SECRETARY_POSTGRES_HOST}
+      SECRETARY_POSTGRES_PORT: ${SECRETARY_POSTGRES_PORT}
+      SECRETARY_POSTGRES_DB: ${SECRETARY_POSTGRES_DB}
+      GAMMA_SECRET: ${GAMMA_SECRET}
+      GAMMA_CLIENT_ID: ${GAMMA_CLIENT_ID}
+      GAMMA_ME_URI: ${GAMMA_ME_URI}
+      GAMMA_TOKEN_URI: ${GAMMA_TOKEN_URI}
+      GAMMA_AUTHORIZATION_URI: ${GAMMA_AUTHORIZATION_URI}
+      GAMMA_REDIRECT_URI: ${GAMMA_REDIRECT_URI}
+      SECRETARY_SECRET_KEY: ${SECRETARY_SECRET_KEY}
+    external_links:
+    - NotificationService/gotify-mock:gotify-mock
+    - Gamma/proxy:gamma
+    volumes:
+    - /data/styrit-secretary-manager/backend/archives:/usr/src/secretary-manager/backend/src/archives
+    - /data/styrit-secretary-manager/backend/uploads:/usr/src/secretary-manager/backend/src/uploads
+    links:
+    - db:db
+
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+    - /data/styrit-secretary-manager/postgres:/var/lib/postgresql/data
+  
+  frontend:
+    image: viddem/styrit-secretary-manager-frontend:latest
